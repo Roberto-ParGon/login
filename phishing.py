@@ -16,6 +16,8 @@ def create_connection():
             user='root',
             password='',
             database='userDB'
+            charset='utf8mb4',
+            collation='utf8mb4_unicode_ci'
         )
         print("Conexión realizada a la BD")
     except Error as e:

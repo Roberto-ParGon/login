@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, session, redirect, url_for
 import mysql.connector
 from mysql.connector import Error
 import bcrypt
 import os
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)  # Clave secreta para la gestión de sesiones
 
 def create_connection():
     connection = None
@@ -13,7 +14,9 @@ def create_connection():
             host='localhost',
             user='root',
             password='',
-            database='userDB'
+            database='userDB',
+            charset='utf8mb4',
+            collation='utf8mb4_unicode_ci'
         )
         print("Conexión realizada a la BD")
     except Error as e:
@@ -24,11 +27,13 @@ def create_connection():
 def index():
     return send_from_directory('static', 'index.html')
 
-
 @app.route('/home')
 def home():
-    return send_from_directory('static', 'home.html')
-
+    # Verifica si el usuario ha iniciado sesión
+    if 'username' in session:
+        return send_from_directory('static', 'home.html')
+    else:
+        return redirect(url_for('index'))  # Redirige a la página de inicio si no está autenticado
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -61,10 +66,15 @@ def login():
     connection.close()
 
     if user and bcrypt.checkpw(password, user[2].encode('utf-8')):
+        session['username'] = username  # Guarda el nombre de usuario en la sesión
         return jsonify({"message": "Inicio de sesión exitoso"}), 200
     else:
         return jsonify({"message": "Credenciales inválidas"}), 401
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('username', None)  # Elimina el nombre de usuario de la sesión
+    return jsonify({"message": "Sesión cerrada exitosamente"}), 200
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8081)
-    
