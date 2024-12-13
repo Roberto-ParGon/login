@@ -66,6 +66,6 @@ curl -X POST http://127.0.0.1:8081/api/authenticate -H "Content-Type: applicatio
 
 **Cliente:** HTTML, CSS, JavaScript.
 
-**Servidor:** Flask, Bcrypt.
+**Servidor:** Python, Flask, Bcrypt.
 
 **Base de datos:** MySQL.
